@@ -1,11 +1,11 @@
 // 本地登记的脚本动作（通用脚本启动器）：登记卡数据驱动，动作在用户目录 actions.json 里增删
 // 两种启动机制（与 butler 服务同款设计，这里去掉 HTTP 层）：
 //   command —— 直接启动命令；done.log+done.regex 命中即完成，否则等进程退出
-//   keys    —— 聚焦窗口发按键（如 F10 开始 / F11 停止）；done.log 必填，超时兜底
+//   keys    —— 聚焦窗口发按键（如 F10 开始 / F11 停止）；proc 没开且配置了 exe 时先自动拉起再等窗口，done.log 必填，超时兜底
 import { spawn } from 'node:child_process'
 import fs from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 export const DEFAULT_ACTIONS = {
   actions: [
@@ -15,12 +15,13 @@ export const DEFAULT_ACTIONS = {
       keys: 'F10',
       stopKeys: 'F11',
       proc: 'MaaEnd',
+      exe: 'E:\\MaaEnd-win-x86_64-v2.27.0\\MaaEnd.exe',
       done: {
         log: 'E:\\MaaEnd-win-x86_64-v2.27.0\\debug\\maafw.log',
         regex: 'Tasker::run_task.*leave',
         timeoutMin: 90
       },
-      note: 'MaaEnd 小助手：聚焦窗口后按 F10 启动当前激活预设，F11 停止；完成以 maafw.log 任务结束标记判定'
+      note: 'MaaEnd 小助手：没开着时先按 exe 自动拉起，就绪后聚焦窗口按 F10 启动当前激活预设，F11 停止；完成以 maafw.log 任务结束标记判定'
     }
   ]
 }
@@ -133,6 +134,48 @@ async function processAlive(pid) {
   return s.includes('YES') || s.includes('WRAPPER') // 无窗口且非 cmd 包装的进程不参与完成判定
 }
 
+// 直接拉起可执行文件（不走 shell，路径带空格也安全）：detached 让它活过本次工具调用
+function launchExe(exePath) {
+  return new Promise((resolve) => {
+    let child
+    try {
+      child = spawn(String(exePath), [], { cwd: dirname(String(exePath)), detached: true, stdio: 'ignore' })
+    } catch (err) {
+      return resolve({ error: err.message })
+    }
+    child.once('error', (err) => resolve({ error: err.message })) // 路径不存在等启动失败走这里
+    child.once('spawn', () => {
+      child.unref()
+      resolve({ pid: child.pid })
+    })
+  })
+}
+
+// 找「有主窗口」的目标进程（keys 档聚焦的前提）；返回 pid 或 null
+async function findWindowProc(name) {
+  const { out } = await psFile(
+    `doro-window-${Date.now()}.ps1`,
+    `$p = Get-Process -Name ${psQuote(name)} -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1\r\n` +
+      `if ($p) { $p.Id }`
+  )
+  const id = Number(String(out).trim())
+  return Number.isFinite(id) && id > 0 ? id : null
+}
+
+// 等窗口出现（刚拉起的程序还要冷启动），超时返回 null
+async function waitWindowProc(name, timeoutMs) {
+  const deadline = Date.now() + timeoutMs
+  for (;;) {
+    const pid = await findWindowProc(name)
+    if (pid) return pid
+    if (Date.now() >= deadline) return null
+    await sleep(2000)
+  }
+}
+
+// 自启后等窗口的上限：MaaEnd 这类 GUI 冷启动要加载资源，给宽一点
+const WINDOW_WAIT_MS = 120000
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 // 完成判定：done.log+regex 命中（增量读，只看新内容）优先，fallback 为进程消失
@@ -244,13 +287,20 @@ export async function runActionTool({ action }) {
 
   if (entry.kind === 'keys') {
     if (!entry.proc) return { error: `动作「${name}」缺少 proc 字段（要聚焦的进程名）` }
-    const before = await findProcId(entry.proc)
+    let pid = await findProcId(entry.proc)
+    if (!pid && entry.exe) {
+      // 自愈：目标没开着就按登记卡里的 exe 先拉起，窗口就绪再送按键
+      const launched = await launchExe(entry.exe)
+      if (launched.error) return { error: `启动 ${entry.exe} 失败：${launched.error}` }
+      pid = await waitWindowProc(entry.proc, WINDOW_WAIT_MS)
+      if (!pid) return { error: `已启动 ${entry.exe}，但 ${WINDOW_WAIT_MS / 1000} 秒内没等到 ${entry.proc} 的窗口，按键没法送` }
+    }
     const sent = await sendKeys(`doro-keys-${Date.now()}`, entry.keys || 'F10', entry.focus !== false, entry.proc)
     if (sent.code !== 0) {
-      return { error: `发送按键失败（进程 ${entry.proc} 未运行？）：${sent.out.trim() || sent.code}` }
+      const why = pid ? `进程 ${entry.proc} 在运行但找不到窗口` : `进程 ${entry.proc} 未运行，且动作没配置 exe 自启路径`
+      return { error: `发送按键失败：${why}（${sent.out.trim() || sent.code}）` }
     }
     // 先等进程出现（游戏/小助手可能由本次按键拉起），再进入完成判定
-    let pid = before
     if (!pid) {
       for (let i = 0; i < 12 && !pid; i++) {
         await sleep(2500)
@@ -262,4 +312,13 @@ export async function runActionTool({ action }) {
   }
 
   return { error: `动作「${name}」的 kind 不支持：${entry.kind}（支持 command / keys）` }
+}
+
+// 通用启动程序：给模型兜底（动作因目标没运行失败时，自己把程序先开起来）
+export async function openProgramTool({ path } = {}) {
+  const p = String(path || '').trim()
+  if (!p) return { error: '缺少 path 参数（要启动的程序的完整路径）' }
+  const launched = await launchExe(p)
+  if (launched.error) return { error: `启动失败：${launched.error}` }
+  return { launched: true, path: p, pid: launched.pid }
 }

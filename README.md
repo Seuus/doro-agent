@@ -45,12 +45,12 @@ scripts/       命令行验证与调试脚本，直接 node 运行，不依赖 E
 ## 核心机制
 
 - **Agent 循环**（src/main/doro/loop.mjs）：调模型 → 收 tool_calls → 本地执行 → 回灌 → 再调，最多 12 轮；流式产出归一化事件（delta / thought / end / error）。
-- **工具集**：`dorosearch`（全盘文件检索，归一化 + 容错打分）、`dororead`（按行读文件）、`dorogrep`（目录内内容搜索）、`dorogame`（游戏今日登录状态）、`dorolist` / `dororun`（脚本动作）。注册表在 tools/index.mjs。
+- **工具集**：`dorosearch`（全盘文件检索，归一化 + 容错打分）、`dororead`（按行读文件）、`dorogrep`（目录内内容搜索）、`dorogame`（游戏今日登录状态）、`dorolist` / `dororun`（脚本动作）、`doroopen`（启动本机程序）。注册表在 tools/index.mjs。
 - **人设与行为规则**：`SYSTEM_PROMPT` 在 src/main/doro/loop.mjs 顶部，开场白在 doro/service.mjs；改动后需重新打包生效。
 - **回复分条**：模型按提示词用空行分段，主进程在空行处把流式回答切成多条气泡（一轮最多 6 条）；切分与归一化实现见 doro/service.mjs 顶部注释。
 - **会话**：多会话持久化到数据目录，可随时切换、删除（两段式确认）；重开应用开新会话。切换/删除的安全性约定见 store/conversations.mjs 与 doro/service.mjs 顶部注释。
 - **游戏日志扫描**（src/shared/games/）：配置表驱动，game-configs.mjs 声明候选目录、日志文件名与登录行正则；未登记的游戏走通用登录判定（generic-login.mjs）；今日状态按日常凌晨 4 点刷新；扫描时提取游戏本体图标（纯 JS 解析 PE 资源，无第三方依赖）。
-- **脚本动作**：数据目录 actions.json 登记，kind=command 直接启动命令，kind=keys 聚焦窗口发按键；完成判定支持日志正则、进程退出、超时兜底。
+- **脚本动作**：数据目录 actions.json 登记，kind=command 直接启动命令，kind=keys 聚焦窗口发按键（目标进程未运行且登记了 `exe` 时先自动拉起、等窗口就绪再发键）；完成判定支持日志正则、进程退出、超时兜底。
 
 ## 验证与调试
 

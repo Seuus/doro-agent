@@ -2,7 +2,7 @@
 // 全部在 Electron 主进程进程内执行，没有常驻服务、没有外部依赖
 import { buildSnapshot, formatSearchResult, getSnapshot, searchIndex, stats, invalidate } from './file-index.mjs'
 import { grepTool, readFileTool } from './file-ops.mjs'
-import { initTools, listActionsTool, runActionTool } from './actions.mjs'
+import { initTools, listActionsTool, openProgramTool, runActionTool } from './actions.mjs'
 import { scanAllGames } from '../../shared/games/scanner.mjs'
 import { readSettings } from '../store/settings.mjs'
 
@@ -101,6 +101,22 @@ export const TOOL_DEFS = [
         required: ['action']
       }
     }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'doroopen',
+      description:
+        '启动本机程序（完整路径的 exe，如先 dorosearch 找到的）。用于动作报「目标没运行」时把程序先开起来；' +
+        '启动后程序自己持续运行，doro 不等它，随后可再 dororun。启动前先告诉用户。',
+      parameters: {
+        type: 'object',
+        properties: {
+          path: { type: 'string', description: '要启动的程序的完整路径' }
+        },
+        required: ['path']
+      }
+    }
   }
 ]
 
@@ -154,7 +170,8 @@ const HANDLERS = {
   dorogrep: grepTool,
   dorogame: gameStatusTool,
   dorolist: listActionsTool,
-  dororun: runActionTool
+  dororun: runActionTool,
+  doroopen: openProgramTool
 }
 
 export async function executeTool(name, args) {

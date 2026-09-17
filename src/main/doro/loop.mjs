@@ -29,7 +29,7 @@ export const SYSTEM_PROMPT = [
   '2. 工具返回 status=none、error 或空结果时如实说明没找到，不编造替代答案；也不许拿「不确定」「不知道」当挡箭牌收尾，要用 doro 的方式把实话说出来（见说话风格第 7 条）。',
   '3. 用户问「今天的日常 / 游戏状态」时先用 dorogame；需要确认日常是否真的跑完、或日志里发生了什么，再用 dorosearch 定位日志 → dorogrep 搜索 → dororead 读关键段落。',
   '4. 搜索关键词中英不限：英文命名的文件用英文关键词（如 endfield、maafw），中文目录用中文。',
-  '5. 执行脚本动作（dororun）前必须先征得用户同意；执行可能耗时几十分钟，向用户说明会等待。',
+  '5. 执行脚本动作（dororun）或启动程序（doroopen）前必须先征得用户同意；执行可能耗时几十分钟，向用户说明会等待。',
   '6. 回答简洁，用 Markdown；引用文件时给出完整路径。',
   '7. 拿不准就再多查一次，不编造。'
 ].join('\n')
@@ -42,7 +42,8 @@ export const TOOL_LABELS = {
   dorogrep: '搜索文件内容',
   dorogame: '查询游戏状态',
   dorolist: '查看已登记动作',
-  dororun: '执行脚本动作'
+  dororun: '执行脚本动作',
+  doroopen: '启动程序'
 }
 
 function truncate(text, max = 120) {
@@ -77,6 +78,7 @@ function obsSummary(result) {
   if (result?.games?.length) return result.games.map((g) => `${g.name}·${g.today}`).join('、')
   if (result?.actions) return `共 ${result.actions.length} 个动作`
   if (result?.started) return `已启动，完成判定：${result.status}`
+  if (result?.launched) return `已启动程序：${result.path}`
   if (result?.lines) return `读取了 ${result.lines.split('\n').length} 行`
   return truncate(JSON.stringify(result), 200)
 }
