@@ -1,0 +1,33 @@
+{
+  "name": "doro-agent",
+  "version": "0.1.0",
+  "description": "dororo —— AI 桌面管家",
+  "main": "./out/main/index.js",
+  "private": true,
+  "scripts": {
+    "dev": "electron-vite dev",
+    "dev:mock": "set DORO_MOCK=1&& electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "dist": "electron-vite build && electron-builder --win",
+    "dist:dir": "electron-vite build && electron-builder --win --dir",
+    "agent:smoke": "node scripts/agent-smoke.mjs",
+    "agent:e2e": "node scripts/agent-e2e.mjs",
+    "agent:conv": "node scripts/agent-conv.mjs",
+    "agent:action": "node scripts/action-e2e.mjs",
+    "index:perf": "node scripts/index-perf.mjs",
+    "games:debug": "node scripts/games-debug.mjs"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.9",
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "markdown-it": "^15.0.2",
+    "vite": "^7.3.6",
+    "vue": "^3.5.42"
+  },
+  "allowScripts": {
+    "electron@44.3.0": true
+  }
+}

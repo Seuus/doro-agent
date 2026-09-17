@@ -1,0 +1,61 @@
+/* 全局 reset 与基础排版：滚动只发生在内部区域，避免整窗滚动 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  font-size: var(--doro-font-base);
+  line-height: 1.6;
+  color: var(--doro-text);
+  background: var(--doro-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+textarea,
+input {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* 细滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--doro-scrollbar-thumb);
+  border-radius: var(--doro-radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--doro-border-strong);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}

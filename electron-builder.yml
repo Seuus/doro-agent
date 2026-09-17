@@ -1,0 +1,29 @@
+# 打包配置。asar 内不含 node_modules（项目刻意保持零运行时依赖），安装包因此很小
+appId: com.dororo.doro-agent
+productName: doro-agent
+copyright: dororo
+
+directories:
+  output: release
+
+files:
+  - out/**
+  - package.json
+
+asar: true
+
+# 无原生模块、无运行时依赖，跳过 npm rebuild
+npmRebuild: false
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: dororo

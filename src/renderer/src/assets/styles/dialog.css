@@ -1,0 +1,191 @@
+/* 弹窗外壳与表单控件的公共样式：设置面板、添加/编辑游戏弹窗共用（组件内不重复实现）。
+   注意：除 .dialog-mask / .dialog 外，所有规则都必须挂在 .dialog 之下做作用域隔离 ——
+   这里的类名（如 .status、.card）很通用，不加前缀会污染其它组件的同名类
+   （曾把对话头部「在线」的 .status 撑成 flex:1，位置被拽到名字旁边）。 */
+.dialog-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(31, 35, 41, 0.35);
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  width: 420px;
+  max-height: calc(100vh - 96px);
+  padding: var(--doro-space-5);
+  background: var(--doro-bg);
+  border-radius: var(--doro-radius-lg);
+  box-shadow: var(--doro-shadow-md);
+}
+
+.dialog .dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--doro-space-3);
+}
+
+.dialog .dialog-title {
+  font-size: var(--doro-font-lg);
+  font-weight: 600;
+}
+
+.dialog .close-btn {
+  width: 24px;
+  height: 24px;
+  color: var(--doro-text-tertiary);
+  font-size: 18px;
+  line-height: 1;
+  border-radius: var(--doro-radius-sm);
+  transition: all var(--doro-transition);
+}
+
+.dialog .close-btn:hover {
+  color: var(--doro-text);
+  background: var(--doro-bg-hover);
+}
+
+.dialog .dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--doro-space-3);
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.dialog .card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--doro-space-2);
+  padding: var(--doro-space-3);
+  background: var(--doro-bg-subtle);
+  border-radius: var(--doro-radius-md);
+}
+
+.dialog .card-name {
+  font-weight: 600;
+}
+
+.dialog .card-desc {
+  color: var(--doro-text-secondary);
+  font-size: var(--doro-font-sm);
+}
+
+.dialog .card-desc.path {
+  color: var(--doro-text-tertiary);
+  font-size: var(--doro-font-xs);
+  word-break: break-all;
+}
+
+.dialog .field {
+  display: flex;
+  align-items: center;
+  gap: var(--doro-space-2);
+}
+
+.dialog .field-row {
+  display: flex;
+  gap: var(--doro-space-2);
+}
+
+.dialog .field-row .field {
+  flex: 1;
+  min-width: 0;
+}
+
+.dialog .field-row .field-label {
+  width: auto;
+}
+
+.dialog .field-label {
+  flex: none;
+  width: 52px;
+  color: var(--doro-text-secondary);
+  font-size: var(--doro-font-sm);
+}
+
+.dialog .field-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  font-size: var(--doro-font-sm);
+  background: var(--doro-bg);
+  border: 1px solid var(--doro-border);
+  border-radius: var(--doro-radius-sm);
+  outline: none;
+  transition: border-color var(--doro-transition);
+}
+
+.dialog .field-input:focus {
+  border-color: var(--doro-primary);
+}
+
+.dialog .file-wrap {
+  display: flex;
+  flex: 1;
+  gap: var(--doro-space-2);
+  align-items: center;
+  min-width: 0;
+}
+
+.dialog .file-path {
+  flex: 1;
+  overflow: hidden;
+  color: var(--doro-text-tertiary);
+  font-size: var(--doro-font-xs);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dialog .card-actions {
+  display: flex;
+  gap: var(--doro-space-2);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.dialog .status {
+  flex: 1;
+  overflow: hidden;
+  color: var(--doro-text-secondary);
+  font-size: var(--doro-font-xs);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dialog .card-btn {
+  flex: none;
+  align-self: flex-end;
+  padding: 3px 12px;
+  color: var(--doro-primary);
+  font-size: var(--doro-font-sm);
+  background: var(--doro-primary-soft);
+  border-radius: var(--doro-radius-pill);
+  transition: all var(--doro-transition);
+}
+
+.dialog .card-btn:hover:not(:disabled) {
+  color: var(--doro-text-inverse);
+  background: var(--doro-primary);
+}
+
+.dialog .card-btn:disabled {
+  color: var(--doro-text-tertiary);
+  background: var(--doro-bg-hover);
+}
+
+.dialog .card-btn.ghost {
+  color: var(--doro-text-secondary);
+  background: none;
+  border: 1px solid var(--doro-border-strong);
+}
+
+.dialog .card-btn.ghost:hover:not(:disabled) {
+  color: var(--doro-text);
+  background: var(--doro-bg-hover);
+}

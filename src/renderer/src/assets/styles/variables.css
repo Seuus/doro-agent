@@ -1,0 +1,56 @@
+/* CSS 变量主题：全部视觉基调的唯一入口，改色只改这里 */
+:root {
+  /* 底色与层次 */
+  --doro-bg:              #ffffff;
+  --doro-bg-subtle:       #f7f8fa;   /* 右侧对话区底 */
+  --doro-bg-panel:        #fafbfc;   /* 左侧面板底 */
+  --doro-bg-card:         #f2f4f7;   /* 游戏卡片 */
+  --doro-bg-hover:        #eaecf0;
+  --doro-bg-input:        #f7f8fa;
+
+  /* 描边 */
+  --doro-border:          #e6e8ec;
+  --doro-border-strong:   #d8dbe0;
+
+  /* 文本 */
+  --doro-text:            #1f2329;
+  --doro-text-secondary:  #646a73;
+  --doro-text-tertiary:   #8f959e;
+  --doro-text-inverse:    #ffffff;
+
+  /* 主题色 */
+  --doro-primary:         #4a7cff;
+  --doro-primary-hover:   #3a6aeb;
+  --doro-primary-soft:    #eaf0ff;
+
+  /* 柔和状态色（每色一组：实色 + 浅底） */
+  --doro-success:         #4cb782;   --doro-success-soft: #e8f6ee;
+  --doro-warning:         #e8a33d;   --doro-warning-soft: #fdf3e3;
+  --doro-neutral:         #a8adb5;   --doro-neutral-soft: #f0f1f3;
+  --doro-danger:          #e5645d;   --doro-danger-soft:  #fdeceb;
+
+  /* 圆角 */
+  --doro-radius-sm:       6px;
+  --doro-radius-md:       10px;
+  --doro-radius-lg:       14px;
+  --doro-radius-pill:     999px;
+
+  /* 阴影 */
+  --doro-shadow-sm:       0 1px 2px rgba(31, 35, 41, .06);
+  --doro-shadow-md:       0 2px 8px rgba(31, 35, 41, .08);
+
+  /* 间距 */
+  --doro-space-1: 4px;  --doro-space-2: 8px;  --doro-space-3: 12px;
+  --doro-space-4: 16px; --doro-space-5: 20px; --doro-space-6: 24px;
+
+  /* 字号 */
+  --doro-font-xs: 11px; --doro-font-sm: 12px;
+  --doro-font-base: 13px; --doro-font-lg: 15px;
+
+  /* 尺寸与动效 */
+  --doro-panel-width:     320px;
+  --doro-session-width:   208px;
+  --doro-header-height:   56px;
+  --doro-transition:      160ms ease;
+  --doro-scrollbar-thumb: #d5d8dd;
+}
